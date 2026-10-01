@@ -1,0 +1,5 @@
+# Runtime deps only. Tests live in requirements-dev.txt.
+openai>=1.40,<4        # one SDK, any provider (base_url decides who answers)
+mcp>=1.28,<2           # v2 removed mcp.server.fastmcp, so stay on 1.x
+httpx>=0.27,<1         # talks to NYC Open Data
+python-dotenv>=1.0,<2  # loads .env

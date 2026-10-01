@@ -1,0 +1,9 @@
+{
+  "name": "3percentclub · Project Great Pumpkin",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "lts" }
+  },
+  "postCreateCommand": "pip install -r requirements-dev.txt && cp -n .env.example .env && curl -fsSL https://github.com/aaif-goose/goose/releases/download/stable/download_cli.sh | CONFIGURE=false bash",
+  "remoteEnv": { "PATH": "${containerEnv:PATH}:/home/vscode/.local/bin" }
+}
