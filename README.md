@@ -89,8 +89,9 @@ who answers: OpenAI, Anthropic, Gemini, DeepSeek, OpenRouter, or Ollama.
 
 - **OpenRouter free models.** Make a free account at openrouter.ai, create a key,
   and use the OpenRouter block that is already filled in at the top of `.env.example`.
-  Free models change often. If yours stops working, pick another `:free` model with
-  tool support from openrouter.ai/models.
+  Its `LLM_MODEL=openrouter/free` sends each request to whichever free model has
+  room right now, so one busy model won't block you. The model can change between
+  turns, which is fine for this lab.
 - **Ollama (runs on your laptop).** Install it from ollama.com, pull a model from
   ollama.com/search?c=tools, and use the Ollama block in `.env.example`.
   Small models often skip tool calls, so pick the biggest one your laptop can run.
@@ -171,6 +172,10 @@ Watch the raw JSON. The model sends something like `{"borough": "Astoria"}`.
 Astoria is a neighborhood, not a borough, so the function returns `[]` with no
 explanation. You'll get either "I couldn't find any" or a confused guess. Good grief.
 
+A smart model sometimes guesses `QUEENS` on its own. If yours does, run it once or
+twice more and watch for `"borough": "Astoria"` in the raw JSON. When it gets it
+right, that's luck, not the spec. The fix is about making it right *every* time.
+
 The model did exactly what the tool card allowed. **Fix the spec, not the prompt.**
 
 **Your task, in `src/loop.py`:**
@@ -222,7 +227,7 @@ Notice who does what: the **model** picks which zips to check, and **plain code*
 does the counting and the math. Never let the model do arithmetic you can do in code.
 
 ```bash
-python src/loop.py "Which is the most sincere pumpkin patch in Astoria?"
+python src/loop.py "Rank 3 pumpkin patches in Queens from most to least sincere."
 ```
 
 ✅ **Checkpoint 3:** you see `audit_noise` calls for at least **two different
@@ -300,13 +305,18 @@ is `servers`, not `mcpServers` (format from VS Code's MCP docs):
 
 On Windows, use `C:\\path\\to\\.venv\\Scripts\\python.exe` (double backslashes in JSON).
 
-**goose** (CLI 1.52). Set up a model provider once with `goose configure`, which
-is an interactive menu. Then attach the server for one run:
+**goose** (CLI 1.52). Using your OpenRouter key from `.env` (no setup menu needed):
 
 ```bash
-goose run --with-extension "great-pumpkin:$(pwd)/.venv/bin/python $(pwd)/src/server.py" \
+set -a; source .env; set +a                 # load your .env into this terminal
+export OPENROUTER_API_KEY="$LLM_API_KEY"    # goose's name for the same key
+goose run --provider openrouter --model "$LLM_MODEL" \
+  --with-extension "great-pumpkin:$(pwd)/.venv/bin/python $(pwd)/src/server.py" \
   -t "Find community gardens in Bushwick"
 ```
+
+Using a different provider? Run `goose configure` once (an interactive menu) to set it
+up, then use the same command without `--provider` and `--model`.
 
 or for a chat session:
 
@@ -356,7 +366,9 @@ Try changing a rule in `SKILL.md` (for example, "only show the top 3") and ask a
 | The model answers without calling any tool | The model doesn't support tool calling (common with small Ollama models) | Pick a bigger or tool-capable model |
 | `ModuleNotFoundError: No module named 'openai'` (or `mcp`, `dotenv`) | The venv isn't active | Activate it (Setup step 2). Your prompt should show `(.venv)` |
 | Windows: `Activate.ps1 cannot be loaded` | PowerShell blocks scripts by default | Run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, or use `cmd` and run `.venv\Scripts\activate.bat` |
+| `RateLimitError: 429` ... `temporarily rate-limited upstream` | That free model is busy | Use `LLM_MODEL=openrouter/free`, or wait a minute and retry |
 | `429 Too Many Requests` from `data.cityofnewyork.us` | The whole class is hitting the city API at once | Wait 30 seconds, keep `limit` small (3-5), and try again |
+| `{"error": "ReadTimeout..."}` in a tool result | The city API was slow (the code already retries once) | Run it again. The model often retries by itself |
 | `RuntimeError: No final answer after N turns` | The model kept calling tools | Raise `max_turns`, or tighten the tool descriptions |
 | MCP client says the server failed to start | Relative path or the wrong Python | Use absolute paths and the venv's Python (see Milestone 4) |
 

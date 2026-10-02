@@ -1,6 +1,6 @@
 """SOLUTION · Milestone 3: a second tool, and the model chains them.
 
-Run it:  python solutions/milestone3.py "Which is the most sincere pumpkin patch in Astoria?"
+Run it:  python solutions/milestone3.py "Rank 3 pumpkin patches in Queens from most to least sincere."
 
 Builds on milestone2.py (search for "M3"):
   1. A second tool card, audit_noise, that takes a zipcode.
@@ -147,6 +147,6 @@ def run_agent(prompt: str, max_turns: int = 12) -> str:  # M3: more turns for mo
 
 
 if __name__ == "__main__":
-    question = " ".join(sys.argv[1:]) or "Which is the most sincere pumpkin patch in Astoria?"
+    question = " ".join(sys.argv[1:]) or "Rank 3 pumpkin patches in Queens from most to least sincere."
     print(f"Linus asks: {question}")
     print("\nAnswer:\n" + run_agent(question))

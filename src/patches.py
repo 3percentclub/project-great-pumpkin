@@ -23,7 +23,20 @@ BOROUGH_CODES = {
     "STATEN ISLAND": "R",
 }
 
-TIMEOUT = 10  # seconds. A slow city API shouldn't freeze the whole class.
+TIMEOUT = 20  # seconds. The city API is sometimes slow, especially with a whole class on it.
+
+
+def _get(url: str, params: dict) -> list[dict]:
+    """GET from Socrata, retrying once if it times out (it sometimes does)."""
+    for attempt in range(2):
+        try:
+            resp = httpx.get(url, params=params, timeout=TIMEOUT)
+            resp.raise_for_status()
+            return resp.json()
+        except httpx.TimeoutException:
+            if attempt == 1:
+                raise
+    return []
 
 
 def get_gardens(borough: str, limit: int = 5) -> list[dict]:
@@ -43,8 +56,6 @@ def get_gardens(borough: str, limit: int = 5) -> list[dict]:
         "$order": "gardenname",  # stable order, so two runs look the same
         "$limit": max(1, min(int(limit), 20)),
     }
-    resp = httpx.get(GARDENS_URL, params=params, timeout=TIMEOUT)
-    resp.raise_for_status()
     return [
         {
             "gardenname": row.get("gardenname", ""),
@@ -53,7 +64,7 @@ def get_gardens(borough: str, limit: int = 5) -> list[dict]:
             "borough": borough.strip().upper(),
             "nta": row.get("nta", ""),
         }
-        for row in resp.json()
+        for row in _get(GARDENS_URL, params)
     ]
 
 
@@ -71,9 +82,7 @@ def count_noise_complaints(zipcode: str, days: int = 7) -> int:
         f"AND created_date > '{since}'"
     )
     params = {"$select": "count(*)", "$where": where}
-    resp = httpx.get(NOISE_URL, params=params, timeout=TIMEOUT)
-    resp.raise_for_status()
-    rows = resp.json()
+    rows = _get(NOISE_URL, params)
     return int(rows[0]["count"]) if rows else 0
 
 

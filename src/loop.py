@@ -36,7 +36,7 @@ FIND_PUMPKIN_PATCHES = {
         "parameters": {
             "type": "object",
             "properties": {
-                "borough": {"type": "string", "description": "Where to look."},
+                "borough": {"type": "string", "description": "Area to search, like a neighborhood."},
                 "limit": {"type": "integer", "description": "How many results."},
             },
             "required": ["borough"],
