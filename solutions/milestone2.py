@@ -25,7 +25,11 @@ from patches import get_gardens  # noqa: E402
 
 load_dotenv()  # reads .env so you don't have to export variables by hand
 
-# Fail loudly and clearly if .env is missing or half filled in.
+# No model set? Use the built-in practice model, so the lab runs with no key.
+if not os.environ.get("LLM_BASE_URL"):
+    os.environ.update(LLM_BASE_URL="practice", LLM_API_KEY="practice", LLM_MODEL="practice")
+
+# Fail loudly and clearly if .env is half filled in.
 for var in ("LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL"):
     if not os.environ.get(var):
         sys.exit(f"Missing {var}. Copy .env.example to .env and fill in "

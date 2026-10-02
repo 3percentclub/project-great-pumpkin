@@ -14,21 +14,12 @@ You will:
 4. *(Stretch)* Wrap the same functions as an **MCP server** and use them in a real agent.
 5. *(Bonus)* Give the agent a **Skill**: a Markdown playbook for the whole job.
 
-> **🚨 Getting "429 Too Many Requests" or other errors? Do this first:**
+> **No API key needed.** Out of the box, the lab uses a built-in **practice model**
+> and a saved copy of the city data, so it can't be rate-limited and works offline.
+> Want a real AI model instead? See [Use a real model (optional)](#use-a-real-model-optional).
 >
-> 1. Get the latest code: `git pull`
-> 2. Open `.env` and set these four lines (no key or internet needed):
->    ```
->    LLM_BASE_URL=practice
->    LLM_API_KEY=practice
->    LLM_MODEL=practice
->    OFFLINE=1
->    ```
-> 3. Run `python src/loop.py "Find a pumpkin patch in Queens"` again.
->
-> This uses a saved copy of the city data and a built-in practice model, so it
-> can't be rate-limited. Every milestone works this way. Switch back to a real
-> model later (see [Setup](#setup-5-min)).
+> **Getting "429 Too Many Requests"?** Run `git pull`, then make sure `.env` matches
+> `.env.example` (`LLM_BASE_URL=practice` and `OFFLINE=1`).
 
 It takes about 60 minutes. Each milestone ends with a ✅ **Checkpoint**. If you hit
 an error, check [Troubleshooting](#troubleshooting) first.
@@ -46,8 +37,7 @@ tests/              pytest checks for the data functions
 
 ## Setup (5 min)
 
-You need **Python 3.10 or newer** (`python3 --version`) and an API key for a
-model that supports **tool calling**. The city data needs no key.
+You need **Python 3.10 or newer** (`python3 --version`). That's it: no API key.
 
 **No install option:** on this repo's GitHub page, click **Code → Codespaces →
 Create codespace**. Python and the dependencies are installed for you, and a
@@ -84,13 +74,20 @@ Your prompt should now start with `(.venv)`. Every command below assumes it does
 pip install -r requirements.txt
 ```
 
-**4. Add your model settings**
+**4. Create your settings file**
 
 ```bash
 cp .env.example .env        # Windows: copy .env.example .env
 ```
 
-Open `.env` and fill in the three variables for **one** provider:
+That's all. The defaults use the practice model and the saved city data.
+
+### Use a real model (optional)
+
+The **practice model** (`src/practice_model.py`) is a few rules pretending to be a
+model. It reads your tool card the way a real model does, so every milestone and
+checkpoint works, but it isn't AI. To see a real model do the same job, open `.env`,
+comment out the three `practice` lines, and fill in **one** provider block:
 
 | Variable | What it is |
 |---|---|
@@ -101,38 +98,19 @@ Open `.env` and fill in the three variables for **one** provider:
 The code uses the `openai` Python package for every provider. `LLM_BASE_URL` decides
 who answers: OpenAI, Anthropic, Gemini, DeepSeek, OpenRouter, or Ollama.
 
-**Getting "429 Too Many Requests" or no key at all?** Use the built-in practice model.
-Put these three lines in `.env`, along with `OFFLINE=1`:
+Free options: an **OpenRouter** account key with `LLM_MODEL=openrouter/free` (limited
+requests per day), a **Gemini** key from aistudio.google.com, or **Ollama** on your
+laptop (pull a model from ollama.com/search?c=tools). Small models often skip tool calls.
 
-```
-LLM_BASE_URL=practice
-LLM_API_KEY=practice
-LLM_MODEL=practice
-OFFLINE=1
-```
-
-It's a few rules pretending to be a model (`src/practice_model.py`), so it needs no
-key, no internet, and never hits a rate limit. It still reads your tool card the way
-a real model does, so Milestones 1–3 and their checkpoints all work. Switch to a real
-model later to see the real thing.
-
-**Free real-model options:**
-
-- **OpenRouter free models.** Make a free account at openrouter.ai, create a key,
-  and use the OpenRouter block that is already filled in at the top of `.env.example`.
-  Its `LLM_MODEL=openrouter/free` sends each request to whichever free model has
-  room right now, so one busy model won't block you. The model can change between
-  turns, which is fine for this lab.
-- **Ollama (runs on your laptop).** Install it from ollama.com, pull a model from
-  ollama.com/search?c=tools, and use the Ollama block in `.env.example`.
-  Small models often skip tool calls, so pick the biggest one your laptop can run.
-
-**Not sure of the model name?** With `.env` filled in, ask your provider:
+Not sure of the model name? Ask your provider:
 
 ```bash
 # macOS/Linux (load .env first: set -a; source .env; set +a)
 curl -s "$LLM_BASE_URL/models" -H "Authorization: Bearer $LLM_API_KEY"
 ```
+
+If a real model keeps failing with 429s, switch back to the practice lines. You don't
+lose anything: your code is the same either way.
 
 ### Smoke test (no AI needed)
 
@@ -154,7 +132,7 @@ Noise complaints in 11102, last 7 days: 53
 If you see `Using the offline snapshot`, the city API is busy. That's fine: the lab
 uses a saved copy of the same data in `data/`.
 
-If this works, your Python and internet are fine. Any later error is about the model settings in `.env`.
+If this works, your Python setup is fine.
 
 ---
 
