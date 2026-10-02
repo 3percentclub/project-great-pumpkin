@@ -14,6 +14,22 @@ You will:
 4. *(Stretch)* Wrap the same functions as an **MCP server** and use them in a real agent.
 5. *(Bonus)* Give the agent a **Skill**: a Markdown playbook for the whole job.
 
+> **🚨 Getting "429 Too Many Requests" or other errors? Do this first:**
+>
+> 1. Get the latest code: `git pull`
+> 2. Open `.env` and set these four lines (no key or internet needed):
+>    ```
+>    LLM_BASE_URL=practice
+>    LLM_API_KEY=practice
+>    LLM_MODEL=practice
+>    OFFLINE=1
+>    ```
+> 3. Run `python src/loop.py "Find a pumpkin patch in Queens"` again.
+>
+> This uses a saved copy of the city data and a built-in practice model, so it
+> can't be rate-limited. Every milestone works this way. Switch back to a real
+> model later (see [Setup](#setup-5-min)).
+
 It takes about 60 minutes. Each milestone ends with a ✅ **Checkpoint**. If you hit
 an error, check [Troubleshooting](#troubleshooting) first.
 
