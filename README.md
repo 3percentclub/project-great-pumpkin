@@ -120,6 +120,9 @@ Gardens in 'Astoria' (should be empty): []
 Noise complaints in 11102, last 7 days: 53
 ```
 
+If you see `Using the offline snapshot`, the city API is busy. That's fine: the lab
+uses a saved copy of the same data in `data/`.
+
 If this works, your Python and internet are fine. Any later error is about the model settings in `.env`.
 
 ---
@@ -367,8 +370,8 @@ Try changing a rule in `SKILL.md` (for example, "only show the top 3") and ask a
 | `ModuleNotFoundError: No module named 'openai'` (or `mcp`, `dotenv`) | The venv isn't active | Activate it (Setup step 2). Your prompt should show `(.venv)` |
 | Windows: `Activate.ps1 cannot be loaded` | PowerShell blocks scripts by default | Run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, or use `cmd` and run `.venv\Scripts\activate.bat` |
 | `RateLimitError: 429` ... `temporarily rate-limited upstream` | That free model is busy | Use `LLM_MODEL=openrouter/free`, or wait a minute and retry |
-| `429 Too Many Requests` from `data.cityofnewyork.us` | The whole class is hitting the city API at once | Wait 30 seconds, keep `limit` small (3-5), and try again |
-| `{"error": "ReadTimeout..."}` in a tool result | The city API was slow (the code already retries once) | Run it again. The model often retries by itself |
+| `NYC Open Data unavailable (... 429 Too Many Requests ...). Using the offline snapshot.` | The whole class is hitting the city API at once | Nothing to fix: the lab switches to the snapshot in `data/` and keeps going. To skip the city API entirely, set `OFFLINE=1` in `.env` |
+| `Rate limit exceeded: free-models-per-day` | OpenRouter allows a limited number of free requests per account per day | Use a different provider key, or Ollama |
 | `RuntimeError: No final answer after N turns` | The model kept calling tools | Raise `max_turns`, or tighten the tool descriptions |
 | MCP client says the server failed to start | Relative path or the wrong Python | Use absolute paths and the venv's Python (see Milestone 4) |
 

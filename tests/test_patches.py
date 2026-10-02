@@ -34,3 +34,12 @@ def test_sincerity_labels():
     assert sincerity(100)["label"] == "Mostly sincere"   # score 50
     assert sincerity(156)["label"] == "Chaotic patch"    # score 22
     assert sincerity(500)["sincerity_score"] == 0         # never below 0
+
+
+def test_offline_snapshot_works(monkeypatch):
+    # When the city API is busy (429) or Wi-Fi is down, we fall back to data/.
+    monkeypatch.setenv("OFFLINE", "1")
+    gardens = get_gardens("QUEENS", limit=3)
+    assert len(gardens) == 3 and gardens[0]["borough"] == "QUEENS"
+    assert get_gardens("Astoria") == []
+    assert isinstance(count_noise_complaints("11102"), int)

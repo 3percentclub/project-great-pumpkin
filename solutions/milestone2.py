@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import APIError, OpenAI
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))  # so we can import patches
 from patches import get_gardens  # noqa: E402
@@ -31,7 +31,9 @@ for var in ("LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL"):
         sys.exit(f"Missing {var}. Copy .env.example to .env and fill in "
                  "LLM_BASE_URL, LLM_API_KEY and LLM_MODEL (see README > Setup).")
 
-client = OpenAI(base_url=os.environ["LLM_BASE_URL"], api_key=os.environ["LLM_API_KEY"])
+# max_retries: if the provider says "too many requests", the SDK waits and retries.
+client = OpenAI(base_url=os.environ["LLM_BASE_URL"], api_key=os.environ["LLM_API_KEY"],
+                max_retries=5)
 MODEL = os.environ["LLM_MODEL"]
 
 # The tool card. This JSON is the ONLY part of your code the model ever reads.
@@ -124,4 +126,10 @@ def run_agent(prompt: str, max_turns: int = 6) -> str:
 if __name__ == "__main__":
     question = " ".join(sys.argv[1:]) or "Find a pumpkin patch in Astoria"
     print(f"Linus asks: {question}")
-    print("\nAnswer:\n" + run_agent(question))
+    try:
+        print("\nAnswer:\n" + run_agent(question))
+    except APIError as e:
+        # Provider problems (busy, bad key, Ollama not running) get one clear line.
+        sys.exit(f"\nThe model provider said no: {e}\n"
+                 "429 = too many requests: wait a minute, or switch LLM_MODEL / provider. "
+                 "See README > Troubleshooting.")
