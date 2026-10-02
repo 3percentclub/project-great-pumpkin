@@ -85,7 +85,22 @@ Open `.env` and fill in the three variables for **one** provider:
 The code uses the `openai` Python package for every provider. `LLM_BASE_URL` decides
 who answers: OpenAI, Anthropic, Gemini, DeepSeek, OpenRouter, or Ollama.
 
-**No key? Two free options:**
+**Getting "429 Too Many Requests" or no key at all?** Use the built-in practice model.
+Put these three lines in `.env`, along with `OFFLINE=1`:
+
+```
+LLM_BASE_URL=practice
+LLM_API_KEY=practice
+LLM_MODEL=practice
+OFFLINE=1
+```
+
+It's a few rules pretending to be a model (`src/practice_model.py`), so it needs no
+key, no internet, and never hits a rate limit. It still reads your tool card the way
+a real model does, so Milestones 1–3 and their checkpoints all work. Switch to a real
+model later to see the real thing.
+
+**Free real-model options:**
 
 - **OpenRouter free models.** Make a free account at openrouter.ai, create a key,
   and use the OpenRouter block that is already filled in at the top of `.env.example`.
@@ -371,7 +386,9 @@ Try changing a rule in `SKILL.md` (for example, "only show the top 3") and ask a
 | Windows: `Activate.ps1 cannot be loaded` | PowerShell blocks scripts by default | Run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, or use `cmd` and run `.venv\Scripts\activate.bat` |
 | `RateLimitError: 429` ... `temporarily rate-limited upstream` | That free model is busy | Use `LLM_MODEL=openrouter/free`, or wait a minute and retry |
 | `NYC Open Data unavailable (... 429 Too Many Requests ...). Using the offline snapshot.` | The whole class is hitting the city API at once | Nothing to fix: the lab switches to the snapshot in `data/` and keeps going. To skip the city API entirely, set `OFFLINE=1` in `.env` |
-| `Rate limit exceeded: free-models-per-day` | OpenRouter allows a limited number of free requests per account per day | Use a different provider key, or Ollama |
+| `Rate limit exceeded: free-models-per-day` | OpenRouter allows a limited number of free requests per account per day | Use the practice model (see Setup), a Gemini key from aistudio.google.com, or Ollama |
+| `The model provider said no: ... 429` | Your model provider is rate-limiting you | Wait a minute, or switch to the practice model (see Setup) |
+| `The model provider said no: Connection error` | Wrong `LLM_BASE_URL`, or Ollama isn't running | Check the URL. For Ollama, start the Ollama app first |
 | `RuntimeError: No final answer after N turns` | The model kept calling tools | Raise `max_turns`, or tighten the tool descriptions |
 | MCP client says the server failed to start | Relative path or the wrong Python | Use absolute paths and the venv's Python (see Milestone 4) |
 

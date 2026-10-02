@@ -31,6 +31,9 @@ for var in ("LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL"):
         sys.exit(f"Missing {var}. Copy .env.example to .env and fill in "
                  "LLM_BASE_URL, LLM_API_KEY and LLM_MODEL (see README > Setup).")
 
+if os.environ["LLM_BASE_URL"] == "practice":  # no key or internet: see src/practice_model.py
+    from practice_model import PracticeClient as OpenAI  # noqa: F811
+
 # max_retries: if the provider says "too many requests", the SDK waits and retries.
 client = OpenAI(base_url=os.environ["LLM_BASE_URL"], api_key=os.environ["LLM_API_KEY"],
                 max_retries=5)
