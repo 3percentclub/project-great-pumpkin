@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "3pc-events": {
+      "command": "C:\\Users\\Dave\\project-great-pumpkin\\.venv\\Scripts\\python.exe",
+      "args": [
+        "C:\\Users\\Dave\\project-great-pumpkin\\src\\server.py"
+      ]
+    }
+  }
+}

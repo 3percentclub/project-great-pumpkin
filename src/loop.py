@@ -41,12 +41,20 @@ FIND_PUMPKIN_PATCHES = {
     "type": "function",
     "function": {
         "name": "find_pumpkin_patches",
-        "description": "Find pumpkin patches (NYC community gardens).",
+        "description": (
+            "Find NYC community gardens (pumpkin patches) in one borough. "
+            "Map neighborhoods to their borough first (e.g., Astoria -> QUEENS, "
+            "Bushwick -> BROOKLYN, East Village -> MANHATTAN)."
+        ),
         "parameters": {
             "type": "object",
             "properties": {
-                "borough": {"type": "string", "description": "Area to search, like a neighborhood."},
-                "limit": {"type": "integer", "description": "How many results."},
+                "borough": {
+                    "type": "string",
+                    "description": "Must be one of: BRONX, BROOKLYN, MANHATTAN, QUEENS, STATEN ISLAND.",
+                    "enum": ["BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND"]
+                },
+                "limit": {"type": "integer", "description": "How many results (1 to 10)."},
             },
             "required": ["borough"],
         },
@@ -68,7 +76,21 @@ def execute_tool(name: str, args: dict) -> str:
 
 
 def run_agent(prompt: str, max_turns: int = 6) -> str:
-    messages = [{"role": "user", "content": prompt}]
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are an assistant that finds NYC community gardens (pumpkin patches). "
+                "1. Always map neighborhood names to their official NYC borough "
+                "(QUEENS, BROOKLYN, MANHATTAN, BRONX, STATEN ISLAND) before calling tools.\n"
+                "2. Check the address and details returned by the tool carefully. "
+                "If the returned garden is in a different neighborhood than requested "
+                "(e.g., South Ozone Park vs. Astoria), explicitly state the actual neighborhood "
+                "to the user rather than claiming it is in the requested neighborhood."
+            )
+        },
+        {"role": "user", "content": prompt}
+    ]
 
     for turn in range(max_turns):
         # STEP 1 · SEND: the conversation so far + the tool menu.
@@ -107,7 +129,7 @@ def run_agent(prompt: str, max_turns: int = 6) -> str:
 
 
 if __name__ == "__main__":
-    question = " ".join(sys.argv[1:]) or "Find a pumpkin patch in Queens"
+    question = " ".join(sys.argv[1:]) or "Find a pumpkin patch in Astoria"
     print(f"Linus asks: {question}")
     try:
         print("\nAnswer:\n" + run_agent(question))
